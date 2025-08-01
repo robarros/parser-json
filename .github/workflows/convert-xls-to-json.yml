@@ -37,8 +37,3 @@ jobs:
         echo "AWS Homologação: $HOMOLOGO"
         echo "AWS Produção: $PROD"
 
-    - name: Upload JSON
-      uses: actions/upload-artifact
-      with:
-        name: json-files
-        path: '*.json'
