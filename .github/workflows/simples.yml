@@ -1,0 +1,38 @@
+name: Converter XLS para JSON
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  converter:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Instalar dependências
+      run: |
+        pip install pandas openpyxl xlrd
+    
+    - name: Executar conversão
+      run: |
+        if [ -f "contas.xls" ] || [ -f "contas.xlsx" ]; then
+          python convert_xls_to_json.py contas.xls* || python convert_xls_to_json.py contas.xlsx*
+          echo "✅ Conversão concluída"
+          ls -la *.json
+        else
+          echo "❌ Arquivo XLS não encontrado"
+        fi
+    
+    - name: Salvar JSON
+      uses: actions/upload-artifact@v3
+      with:
+        name: json-convertido
+        path: '*.json'

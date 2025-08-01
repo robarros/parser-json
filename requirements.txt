@@ -1,0 +1,26 @@
+# Dependências para o projeto de conversão XLS para JSON
+# 
+# Para instalar todas as dependências:
+# pip install -r requirements.txt
+#
+# Para instalar em ambiente virtual:
+# python -m venv venv
+# source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate     # Windows
+# pip install -r requirements.txt
+
+# Biblioteca principal para manipulação de arquivos Excel
+pandas>=2.0.0
+
+# Dependência para leitura de arquivos Excel (.xls e .xlsx)
+openpyxl>=3.1.0
+
+# Dependência adicional para arquivos .xls antigos (Excel 97-2003)
+xlrd>=2.0.0
+
+# Biblioteca para manipulação de JSON (já incluída no Python padrão, mas boa prática listar)
+# json - incluído no Python padrão
+
+# Bibliotecas do sistema (já incluídas no Python padrão)
+# sys - incluído no Python padrão
+# os - incluído no Python padrão

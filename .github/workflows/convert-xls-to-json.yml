@@ -1,0 +1,44 @@
+name: Convert XLS to JSON
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  TIME: fv4
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: pip install pandas openpyxl xlrd
+    
+    - name: Convert XLS to JSON
+      run: |
+        python convert_xls_to_json.py ${{ env.TIME }}
+
+    - name: parse JSON
+      run: |
+        DEV=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "dev") | .aws' contas.json)
+        HOMOLOGO=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "homologacao") | .aws' contas.json)
+        PROD=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "producao") | .aws' contas.json)
+        
+        echo "AWS Dev: $DEV"
+        echo "AWS Homologação: $HOMOLOGO"
+        echo "AWS Produção: $PROD"
+
+    - name: Upload JSON
+      uses: actions/upload-artifact@v3
+      with:
+        name: json-files
+        path: '*.json'
