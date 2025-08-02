@@ -12,7 +12,7 @@ on:
         type: string
 
 env:
-  TIME: ${{ inputs.time || vars.TIME || 'ei7' }}
+  TIME: ${{ github.event.inputs.time || 'ei7' }}
 
 jobs:
   convert:
