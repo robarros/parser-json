@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  TIME: fv4
+  TIME: bc1
 
 jobs:
   convert:
