@@ -30,14 +30,47 @@ jobs:
     - name: Read JSON file
       run: |
         cat contas.json
-
-    - name: parse JSON
+    
+    - name: Parse JSON and export environments dynamically
       run: |
-        DEV=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "dev") | .aws' contas.json)
-        HOMOLOGO=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "homologacao") | .aws' contas.json)
-        PROD=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "producao") | .aws' contas.json)
+        # Busca todos os ambientes disponíveis para o time especificado
+        ENVIRONMENTS=$(jq -r --arg time "${{ env.TIME }}" '.[] | select(.time == $time) | .ambiente' contas.json | sort | uniq)
         
-        echo "AWS Dev: $DEV"
-        echo "AWS Homologação: $HOMOLOGO"
-        echo "AWS Produção: $PROD"
+        echo "=== Ambientes encontrados para o time ${{ env.TIME }} ==="
+        echo "$ENVIRONMENTS"
+        echo "=================================================="
+        
+        # Para cada ambiente encontrado, extrai a conta AWS
+        for ENV in $ENVIRONMENTS; do
+          AWS_ACCOUNT=$(jq -r --arg time "${{ env.TIME }}" --arg env "$ENV" '.[] | select(.time == $time and .ambiente == $env) | .aws' contas.json)
+          
+          if [ "$AWS_ACCOUNT" != "null" ] && [ -n "$AWS_ACCOUNT" ]; then
+            # Converte para maiúscula e exporta como variável de ambiente
+            ENV_VAR="AWS_${ENV^^}"
+            echo "$ENV_VAR=$AWS_ACCOUNT" >> $GITHUB_ENV
+            echo "✅ $ENV -> $AWS_ACCOUNT (exportado como $ENV_VAR)"
+          else
+            echo "❌ $ENV -> Conta AWS não encontrada"
+          fi
+        done
+        
+        # Mostra quantos ambientes foram processados
+        ENV_COUNT=$(echo "$ENVIRONMENTS" | wc -l)
+        echo "Total de ambientes processados: $ENV_COUNT"
+
+    - name: Show exported variables
+      run: |
+        echo "=== Variáveis de ambiente exportadas ==="
+        env | grep "^AWS_" | sort || echo "Nenhuma variável AWS_ encontrada"
+        echo "========================================"
+
+    # - name: parse JSON
+    #   run: |
+    #     DEV=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "dev") | .aws' contas.json)
+    #     HOMOLOGO=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "homologacao") | .aws' contas.json)
+    #     PROD=$(jq -r '.[] | select(.time == "fv4" and .ambiente == "producao") | .aws' contas.json)
+        
+    #     echo "AWS Dev: $DEV"
+    #     echo "AWS Homologação: $HOMOLOGO"
+    #     echo "AWS Produção: $PROD"
 
