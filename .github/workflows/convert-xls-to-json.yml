@@ -4,9 +4,15 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      time:
+        description: 'Nome do time (ex: ei7, fv4, etc.)'
+        required: true
+        default: 'ei7'
+        type: string
 
 env:
-  TIME: ei7
+  TIME: ${{ inputs.time || vars.TIME || 'ei7' }}
 
 jobs:
   convert:
